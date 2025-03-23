@@ -1,35 +1,72 @@
 <script setup lang="ts">
-const list = [
-	'Item 1',
-	'Item 2',
-	'Item 3',
-	'Item 4',
-	'Item 5',
-	'Item 6',
-	'Item 7',
-	'Item 8',
-	'Item 9',
-	'Item 10',
+const videos = [
+	{
+		id: 's_nc1IVoMxc',
+		title: 'Hi Ren',
+		genre: ['Hip-Hop', 'Alternative'],
+	},
+	{
+		id: 'TYAnqQ--KX0',
+		title: 'The Tale of Jenny & Screech',
+		genre: ['Folk', 'Storytelling'],
+	},
+	{
+		id: '35yALr_opeg',
+		title: 'Chalk Outlines',
+		genre: ['Hip-Hop', 'Live Performance'],
+		coArtists: ['Chinchilla'],
+	},
+	{
+		id: '1T_fLytBFM4',
+		title: 'The Hunger',
+		genre: ['Alternative', 'Rock'],
+	},
+	{
+		id: 'mLvAGjhDssc',
+		title: 'Losing it',
+		genre: ['Hip-Hop', 'Remix'],
+		coArtists: ['FISHER'],
+	},
+	{
+		id: 'J2H7wDR9eTU',
+		title: '1990s',
+		genre: ['Hip-Hop', 'Alternative'],
+	},
+	{
+		id: '0ivQwwgW4OY',
+		title: 'Money Game',
+		genre: ['Hip-Hop', 'Political'],
+	},
+	{
+		id: 'YonS9_QJbp8',
+		title: 'Money Game Part 2',
+		genre: ['Hip-Hop', 'Political'],
+	},
+	{
+		id: 'nyWbun_PbTc',
+		title: 'Money Game Part 3',
+		genre: ['Hip-Hop', 'Political'],
+	},
 ]
 
 const features = [
 	{
-		title: 'Feature 1',
+		title: 'Genre-Blending Artist',
 		description:
-			'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
-		icon: 'i-heroicons-star',
+			'Ren seamlessly blends hip-hop, folk, and alternative styles to create a unique sound that defies traditional categorization.',
+		icon: 'i-heroicons-musical-note',
 	},
 	{
-		title: 'Feature 2',
+		title: 'Storytelling Through Music',
 		description:
-			'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.',
-		icon: 'i-heroicons-bolt',
+			'Each song weaves intricate narratives that tackle complex themes, from personal struggles to societal issues.',
+		icon: 'i-heroicons-book-open',
 	},
 	{
-		title: 'Feature 3',
+		title: 'Visual Artistry',
 		description:
-			'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla.',
-		icon: 'i-heroicons-globe-alt',
+			'Compelling music videos that bring stories to life through creative visuals and powerful performances.',
+		icon: 'i-heroicons-video-camera',
 	},
 ]
 </script>
@@ -44,29 +81,27 @@ const features = [
 				<h1
 					class="mb-6 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white"
 				>
-					Reniverse
+					Ren
 				</h1>
 				<p
 					class="mx-auto mb-10 max-w-3xl text-xl text-gray-600 dark:text-gray-300"
 				>
-					Welcome to the future of digital experiences. Discover what
-					makes Reniverse special.
+					Genre-defying musician blending hip-hop, folk, and
+					alternative styles to create powerful narratives through
+					music.
 				</p>
 				<div class="flex justify-center gap-4">
-					<BaseButton to="#start">Get Started</BaseButton>
+					<BaseButton to="#videos">Watch Videos</BaseButton>
 				</div>
 			</div>
 		</header>
 
 		<!-- Features Section -->
-		<section
-			id="start"
-			class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8"
-		>
+		<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
 			<h2
 				class="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white"
 			>
-				Key Features
+				About the Artist
 			</h2>
 			<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 				<FeatureCard
@@ -79,40 +114,26 @@ const features = [
 			</div>
 		</section>
 
-		<!-- List Section -->
+		<!-- Videos Section -->
 		<section
+			id="videos"
 			class="mx-auto max-w-7xl rounded-xl bg-gray-50 px-4 py-16 sm:px-6 lg:px-8 dark:bg-gray-900"
 		>
 			<h2
 				class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white"
 			>
-				Our Offerings
+				Music Videos
 			</h2>
-			<ul
-				class="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-			>
-				<ListItem
-					v-for="item in list"
-					:key="item"
-					:text="item"
+			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<VideoCard
+					v-for="video in videos"
+					:id="video.id"
+					:key="video.id"
+					:title="video.title"
+					:genre="video.genre"
+					:co-artists="video.coArtists"
 				/>
-			</ul>
-		</section>
-
-		<!-- CTA Section -->
-		<section
-			class="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8"
-		>
-			<h2 class="mb-6 text-3xl font-bold text-gray-900 dark:text-white">
-				Ready to dive in?
-			</h2>
-			<p
-				class="mx-auto mb-8 max-w-3xl text-xl text-gray-600 dark:text-gray-300"
-			>
-				Join thousands of users who are already experiencing the power
-				of Reniverse.
-			</p>
-			<BaseButton to="/signup">Sign Up Now</BaseButton>
+			</div>
 		</section>
 
 		<!-- Footer -->
@@ -121,25 +142,27 @@ const features = [
 				class="mx-auto flex max-w-7xl flex-col items-center justify-between px-4 sm:flex-row sm:px-6 lg:px-8"
 			>
 				<div class="mb-4 text-gray-600 sm:mb-0 dark:text-gray-300">
-					© {{ new Date().getFullYear() }} Reniverse. All rights
-					reserved.
+					© {{ new Date().getFullYear() }} Ren. All rights reserved.
 				</div>
 				<div class="flex gap-6">
 					<a
 						href="#"
 						class="hover:text-primary-500 dark:hover:text-primary-400 text-gray-600 dark:text-gray-300"
-						>About</a
 					>
+						About
+					</a>
 					<a
 						href="#"
 						class="hover:text-primary-500 dark:hover:text-primary-400 text-gray-600 dark:text-gray-300"
-						>Contact</a
 					>
+						Contact
+					</a>
 					<a
 						href="#"
 						class="hover:text-primary-500 dark:hover:text-primary-400 text-gray-600 dark:text-gray-300"
-						>Privacy</a
 					>
+						Privacy
+					</a>
 				</div>
 			</div>
 		</footer>
