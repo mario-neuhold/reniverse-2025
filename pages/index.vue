@@ -1,54 +1,11 @@
 <script setup lang="ts">
-const videos = [
-	{
-		id: 's_nc1IVoMxc',
-		title: 'Hi Ren',
-		genre: ['Hip-Hop', 'Alternative'],
-	},
-	{
-		id: 'TYAnqQ--KX0',
-		title: 'The Tale of Jenny & Screech',
-		genre: ['Folk', 'Storytelling'],
-	},
-	{
-		id: '35yALr_opeg',
-		title: 'Chalk Outlines',
-		genre: ['Hip-Hop', 'Live Performance'],
-		coArtists: ['Chinchilla'],
-	},
-	{
-		id: '1T_fLytBFM4',
-		title: 'The Hunger',
-		genre: ['Alternative', 'Rock'],
-	},
-	{
-		id: 'mLvAGjhDssc',
-		title: 'Losing it',
-		genre: ['Hip-Hop', 'Remix'],
-		coArtists: ['FISHER'],
-	},
-	{
-		id: 'J2H7wDR9eTU',
-		title: '1990s',
-		genre: ['Hip-Hop', 'Alternative'],
-	},
-	{
-		id: '0ivQwwgW4OY',
-		title: 'Money Game',
-		genre: ['Hip-Hop', 'Political'],
-	},
-	{
-		id: 'YonS9_QJbp8',
-		title: 'Money Game Part 2',
-		genre: ['Hip-Hop', 'Political'],
-	},
-	{
-		id: 'nyWbun_PbTc',
-		title: 'Money Game Part 3',
-		genre: ['Hip-Hop', 'Political'],
-	},
-]
+import { useSongsStore } from '~/stores/songs'
+import { useReactionsStore } from '~/stores/reactions'
 
+const songsStore = useSongsStore()
+const reactionsStore = useReactionsStore()
+
+const videos = computed(() => songsStore.getAllSongs)
 const features = [
 	{
 		title: 'Genre-Blending Artist',
@@ -70,75 +27,17 @@ const features = [
 	},
 ]
 
-const reactionCategories = [
-	'Vocal Analysis',
-	'Lyrics Breakdown',
-	'Emotional Response',
-	'Mental Health',
-	'Musical Analysis',
-	'First Time Reaction',
-	'Producer Review',
-]
-
-const reactions = [
-	{
-		id: 'example1',
-		songId: 's_nc1IVoMxc',
-		title: 'Vocal Coach Reacts to Hi Ren',
-		channelName: 'Chris Liepe',
-		categories: ['Vocal Analysis', 'Musical Analysis'],
-	},
-	{
-		id: 'example2',
-		songId: 'TYAnqQ--KX0',
-		title: 'Knox Hill - Jenny & Screech Reaction & Breakdown',
-		channelName: 'Knox Hill',
-		categories: ['Lyrics Breakdown', 'Mental Health'],
-	},
-	{
-		id: 'example3',
-		songId: '0ivQwwgW4OY',
-		title: 'Opera Singer Reacts to Money Game',
-		channelName: 'A Charismatic Voice',
-		categories: [
-			'Vocal Analysis',
-			'First Time Reaction',
-			'Emotional Response',
-		],
-	},
-	{
-		id: 'example4',
-		songId: 'nyWbun_PbTc',
-		title: 'Money Game Part 3 - Real Rapper Reacts',
-		channelName: 'Black Pegasus',
-		categories: ['Lyrics Breakdown', 'Musical Analysis'],
-	},
-]
-
-const selectedSong = ref('')
-const selectedCategories = ref<string[]>([])
-
-const filteredReactions = computed(() => {
-	return reactions.filter((reaction) => {
-		const matchesSong =
-			!selectedSong.value || reaction.songId === selectedSong.value
-		const matchesCategories =
-			selectedCategories.value.length === 0 ||
-			selectedCategories.value.some((cat) =>
-				reaction.categories.includes(cat),
-			)
-		return matchesSong && matchesCategories
-	})
+const reactionCategories = computed(() => reactionsStore.getCategories)
+const filteredReactions = computed(() => reactionsStore.getFilteredReactions)
+const selectedSong = computed({
+	get: () => reactionsStore.selectedSong,
+	set: (value) => reactionsStore.setSelectedSong(value),
 })
 
-const toggleCategory = (category: string) => {
-	const index = selectedCategories.value.indexOf(category)
-	if (index === -1) {
-		selectedCategories.value.push(category)
-	} else {
-		selectedCategories.value.splice(index, 1)
-	}
-}
+const toggleCategory = (category: string) =>
+	reactionsStore.toggleCategory(category)
+const isSelectedCategory = (category: string) =>
+	reactionsStore.selectedCategories.includes(category)
 </script>
 
 <template>
@@ -227,8 +126,9 @@ const toggleCategory = (category: string) => {
 				<div class="mb-6">
 					<label
 						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-						>Select a Song</label
 					>
+						Select a Song
+					</label>
 					<select
 						v-model="selectedSong"
 						class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -247,15 +147,16 @@ const toggleCategory = (category: string) => {
 				<div>
 					<label
 						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-						>Filter by Category</label
 					>
+						Filter by Category
+					</label>
 					<div class="flex flex-wrap gap-2">
 						<button
 							v-for="category in reactionCategories"
 							:key="category"
 							class="rounded-full px-4 py-2 text-sm transition-colors"
 							:class="[
-								selectedCategories.includes(category)
+								isSelectedCategory(category)
 									? 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-100'
 									: 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
 							]"
