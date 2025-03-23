@@ -59,6 +59,56 @@ export const useReactionsStore = defineStore('reactions', {
 				this.loading = false
 			}
 		},
+
+		async importVideos(
+			videos: Array<{
+				id: string
+				title: string
+				channel_name: string
+				categories: string[]
+				song_id: string
+			}>,
+		) {
+			this.loading = true
+			this.error = null
+			let imported = 0
+
+			try {
+				const supabase = useSupabaseClient<Database>()
+
+				// Filter out videos that already exist
+				const newVideos = videos.filter(
+					(video) =>
+						!this.reactions.some(
+							(reaction) => reaction.id === video.id,
+						),
+				)
+
+				if (newVideos.length === 0) {
+					return 0
+				}
+
+				const { data, error } = await supabase
+					.from('reactions')
+					.insert(newVideos)
+					.select()
+
+				if (error) throw error
+				if (data) {
+					this.reactions.push(...data)
+					imported = data.length
+				}
+
+				return imported
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error importing reactions:', e)
+				return 0
+			} finally {
+				this.loading = false
+			}
+		},
+
 		async addReaction(reaction: Omit<Reaction, 'created_at'>) {
 			this.loading = true
 			this.error = null

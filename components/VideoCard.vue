@@ -3,7 +3,7 @@ interface Props {
 	id: string
 	title: string
 	genre?: string[]
-	coArtists?: string[]
+	coArtists?: string[] | null
 }
 
 defineProps<Props>()

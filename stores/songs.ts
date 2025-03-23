@@ -34,6 +34,47 @@ export const useSongsStore = defineStore('songs', {
 				this.loading = false
 			}
 		},
+
+		async importVideos(
+			videos: Array<{ id: string; title: string; genres: string[] }>,
+		) {
+			this.loading = true
+			this.error = null
+			let imported = 0
+
+			try {
+				const supabase = useSupabaseClient<Database>()
+
+				// Filter out videos that already exist
+				const newVideos = videos.filter(
+					(video) => !this.songs.some((song) => song.id === video.id),
+				)
+
+				if (newVideos.length === 0) {
+					return 0
+				}
+
+				const { data, error } = await supabase
+					.from('songs')
+					.insert(newVideos)
+					.select()
+
+				if (error) throw error
+				if (data) {
+					this.songs.push(...data)
+					imported = data.length
+				}
+
+				return imported
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error importing songs:', e)
+				return 0
+			} finally {
+				this.loading = false
+			}
+		},
+
 		async addSong(song: Omit<Song, 'created_at'>) {
 			this.loading = true
 			this.error = null

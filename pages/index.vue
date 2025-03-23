@@ -104,6 +104,9 @@ const isSelectedCategory = (category: string) =>
 			>
 				Music Videos
 			</h2>
+			<div class="mb-8">
+				<ImportPlaylist />
+			</div>
 			<div
 				v-if="error"
 				class="mb-8 rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900 dark:text-red-100"
