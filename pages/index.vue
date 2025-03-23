@@ -5,6 +5,14 @@ import { useReactionsStore } from '~/stores/reactions'
 const songsStore = useSongsStore()
 const reactionsStore = useReactionsStore()
 
+// Fetch data on component mount
+onMounted(async () => {
+	await Promise.all([
+		songsStore.fetchSongs(),
+		reactionsStore.fetchReactions(),
+	])
+})
+
 const videos = computed(() => songsStore.getAllSongs)
 const features = [
 	{
@@ -29,6 +37,9 @@ const features = [
 
 const reactionCategories = computed(() => reactionsStore.getCategories)
 const filteredReactions = computed(() => reactionsStore.getFilteredReactions)
+const isLoading = computed(() => songsStore.loading || reactionsStore.loading)
+const error = computed(() => songsStore.error || reactionsStore.error)
+
 const selectedSong = computed({
 	get: () => reactionsStore.selectedSong,
 	set: (value) => reactionsStore.setSelectedSong(value),
@@ -93,14 +104,31 @@ const isSelectedCategory = (category: string) =>
 			>
 				Music Videos
 			</h2>
-			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+			<div
+				v-if="error"
+				class="mb-8 rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900 dark:text-red-100"
+			>
+				{{ error }}
+			</div>
+			<div
+				v-if="isLoading"
+				class="flex justify-center py-12"
+			>
+				<div
+					class="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
+				></div>
+			</div>
+			<div
+				v-else
+				class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+			>
 				<VideoCard
 					v-for="video in videos"
 					:id="video.id"
 					:key="video.id"
 					:title="video.title"
-					:genre="video.genre"
-					:co-artists="video.coArtists"
+					:genre="video.genres"
+					:co-artists="video.co_artists"
 				/>
 			</div>
 		</section>
@@ -169,15 +197,32 @@ const isSelectedCategory = (category: string) =>
 			</div>
 
 			<!-- Reaction Videos Grid -->
-			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+			<div
+				v-if="error"
+				class="mb-8 rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900 dark:text-red-100"
+			>
+				{{ error }}
+			</div>
+			<div
+				v-if="isLoading"
+				class="flex justify-center py-12"
+			>
+				<div
+					class="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
+				></div>
+			</div>
+			<div
+				v-else
+				class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+			>
 				<ReactionCard
 					v-for="reaction in filteredReactions"
 					:id="reaction.id"
 					:key="reaction.id"
 					:title="reaction.title"
-					:channel-name="reaction.channelName"
+					:channel-name="reaction.channel_name"
 					:categories="reaction.categories"
-					:song-id="reaction.songId"
+					:song-id="reaction.song_id"
 				/>
 			</div>
 		</section>

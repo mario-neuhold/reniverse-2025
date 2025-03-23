@@ -1,67 +1,108 @@
 import { defineStore } from 'pinia'
+import type { Database } from '~/types/database.types'
 
-interface Song {
-	id: string
-	title: string
-	genre: string[]
-	coArtists?: string[]
-}
+type Song = Database['public']['Tables']['songs']['Row']
 
 export const useSongsStore = defineStore('songs', {
 	state: () => ({
-		songs: [
-			{
-				id: 's_nc1IVoMxc',
-				title: 'Hi Ren',
-				genre: ['Hip-Hop', 'Alternative'],
-			},
-			{
-				id: 'TYAnqQ--KX0',
-				title: 'The Tale of Jenny & Screech',
-				genre: ['Folk', 'Storytelling'],
-			},
-			{
-				id: '35yALr_opeg',
-				title: 'Chalk Outlines',
-				genre: ['Hip-Hop', 'Live Performance'],
-				coArtists: ['Chinchilla'],
-			},
-			{
-				id: '1T_fLytBFM4',
-				title: 'The Hunger',
-				genre: ['Alternative', 'Rock'],
-			},
-			{
-				id: 'mLvAGjhDssc',
-				title: 'Losing it',
-				genre: ['Hip-Hop', 'Remix'],
-				coArtists: ['FISHER'],
-			},
-			{
-				id: 'J2H7wDR9eTU',
-				title: '1990s',
-				genre: ['Hip-Hop', 'Alternative'],
-			},
-			{
-				id: '0ivQwwgW4OY',
-				title: 'Money Game',
-				genre: ['Hip-Hop', 'Political'],
-			},
-			{
-				id: 'YonS9_QJbp8',
-				title: 'Money Game Part 2',
-				genre: ['Hip-Hop', 'Political'],
-			},
-			{
-				id: 'nyWbun_PbTc',
-				title: 'Money Game Part 3',
-				genre: ['Hip-Hop', 'Political'],
-			},
-		] as Song[],
+		songs: [] as Song[],
+		loading: false,
+		error: null as string | null,
 	}),
 	getters: {
 		getAllSongs: (state) => state.songs,
 		getSongById: (state) => (id: string) =>
 			state.songs.find((song) => song.id === id),
+	},
+	actions: {
+		async fetchSongs() {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { data, error } = await supabase
+					.from('songs')
+					.select('*')
+					.order('created_at', { ascending: true })
+
+				if (error) throw error
+				this.songs = data
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error loading songs:', e)
+			} finally {
+				this.loading = false
+			}
+		},
+		async addSong(song: Omit<Song, 'created_at'>) {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { data, error } = await supabase
+					.from('songs')
+					.insert(song)
+					.select()
+					.single()
+
+				if (error) throw error
+				if (data) {
+					this.songs.push(data)
+				}
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error adding song:', e)
+			} finally {
+				this.loading = false
+			}
+		},
+		async updateSong(
+			id: string,
+			updates: Partial<Omit<Song, 'id' | 'created_at'>>,
+		) {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { data, error } = await supabase
+					.from('songs')
+					.update(updates)
+					.eq('id', id)
+					.select()
+					.single()
+
+				if (error) throw error
+				if (data) {
+					const index = this.songs.findIndex((song) => song.id === id)
+					if (index !== -1) {
+						this.songs[index] = data
+					}
+				}
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error updating song:', e)
+			} finally {
+				this.loading = false
+			}
+		},
+		async deleteSong(id: string) {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { error } = await supabase
+					.from('songs')
+					.delete()
+					.eq('id', id)
+
+				if (error) throw error
+				this.songs = this.songs.filter((song) => song.id !== id)
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error deleting song:', e)
+			} finally {
+				this.loading = false
+			}
+		},
 	},
 })

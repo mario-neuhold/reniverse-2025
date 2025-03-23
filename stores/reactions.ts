@@ -1,12 +1,7 @@
 import { defineStore } from 'pinia'
+import type { Database } from '~/types/database.types'
 
-interface Reaction {
-	id: string
-	songId: string
-	title: string
-	channelName: string
-	categories: string[]
-}
+type Reaction = Database['public']['Tables']['reactions']['Row']
 
 export const useReactionsStore = defineStore('reactions', {
 	state: () => ({
@@ -19,42 +14,11 @@ export const useReactionsStore = defineStore('reactions', {
 			'First Time Reaction',
 			'Producer Review',
 		] as string[],
-		reactions: [
-			{
-				id: 'example1',
-				songId: 's_nc1IVoMxc',
-				title: 'Vocal Coach Reacts to Hi Ren',
-				channelName: 'Chris Liepe',
-				categories: ['Vocal Analysis', 'Musical Analysis'],
-			},
-			{
-				id: 'example2',
-				songId: 'TYAnqQ--KX0',
-				title: 'Knox Hill - Jenny & Screech Reaction & Breakdown',
-				channelName: 'Knox Hill',
-				categories: ['Lyrics Breakdown', 'Mental Health'],
-			},
-			{
-				id: 'example3',
-				songId: '0ivQwwgW4OY',
-				title: 'Opera Singer Reacts to Money Game',
-				channelName: 'A Charismatic Voice',
-				categories: [
-					'Vocal Analysis',
-					'First Time Reaction',
-					'Emotional Response',
-				],
-			},
-			{
-				id: 'example4',
-				songId: 'nyWbun_PbTc',
-				title: 'Money Game Part 3 - Real Rapper Reacts',
-				channelName: 'Black Pegasus',
-				categories: ['Lyrics Breakdown', 'Musical Analysis'],
-			},
-		] as Reaction[],
+		reactions: [] as Reaction[],
 		selectedSong: '',
 		selectedCategories: [] as string[],
+		loading: false,
+		error: null as string | null,
 	}),
 	getters: {
 		getCategories: (state) => state.categories,
@@ -63,7 +27,7 @@ export const useReactionsStore = defineStore('reactions', {
 			return state.reactions.filter((reaction) => {
 				const matchesSong =
 					!state.selectedSong ||
-					reaction.songId === state.selectedSong
+					reaction.song_id === state.selectedSong
 				const matchesCategories =
 					state.selectedCategories.length === 0 ||
 					state.selectedCategories.some((cat) =>
@@ -73,9 +37,102 @@ export const useReactionsStore = defineStore('reactions', {
 			})
 		},
 		getReactionsBySong: (state) => (songId: string) =>
-			state.reactions.filter((reaction) => reaction.songId === songId),
+			state.reactions.filter((reaction) => reaction.song_id === songId),
 	},
 	actions: {
+		async fetchReactions() {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { data, error } = await supabase
+					.from('reactions')
+					.select('*')
+					.order('created_at', { ascending: true })
+
+				if (error) throw error
+				this.reactions = data
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error loading reactions:', e)
+			} finally {
+				this.loading = false
+			}
+		},
+		async addReaction(reaction: Omit<Reaction, 'created_at'>) {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { data, error } = await supabase
+					.from('reactions')
+					.insert(reaction)
+					.select()
+					.single()
+
+				if (error) throw error
+				if (data) {
+					this.reactions.push(data)
+				}
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error adding reaction:', e)
+			} finally {
+				this.loading = false
+			}
+		},
+		async updateReaction(
+			id: string,
+			updates: Partial<Omit<Reaction, 'id' | 'created_at'>>,
+		) {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { data, error } = await supabase
+					.from('reactions')
+					.update(updates)
+					.eq('id', id)
+					.select()
+					.single()
+
+				if (error) throw error
+				if (data) {
+					const index = this.reactions.findIndex(
+						(reaction) => reaction.id === id,
+					)
+					if (index !== -1) {
+						this.reactions[index] = data
+					}
+				}
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error updating reaction:', e)
+			} finally {
+				this.loading = false
+			}
+		},
+		async deleteReaction(id: string) {
+			this.loading = true
+			this.error = null
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { error } = await supabase
+					.from('reactions')
+					.delete()
+					.eq('id', id)
+
+				if (error) throw error
+				this.reactions = this.reactions.filter(
+					(reaction) => reaction.id !== id,
+				)
+			} catch (e) {
+				this.error = (e as Error).message
+				console.error('Error deleting reaction:', e)
+			} finally {
+				this.loading = false
+			}
+		},
 		setSelectedSong(songId: string) {
 			this.selectedSong = songId
 		},
