@@ -69,6 +69,76 @@ const features = [
 		icon: 'i-heroicons-video-camera',
 	},
 ]
+
+const reactionCategories = [
+	'Vocal Analysis',
+	'Lyrics Breakdown',
+	'Emotional Response',
+	'Mental Health',
+	'Musical Analysis',
+	'First Time Reaction',
+	'Producer Review',
+]
+
+const reactions = [
+	{
+		id: 'example1',
+		songId: 's_nc1IVoMxc',
+		title: 'Vocal Coach Reacts to Hi Ren',
+		channelName: 'Chris Liepe',
+		categories: ['Vocal Analysis', 'Musical Analysis'],
+	},
+	{
+		id: 'example2',
+		songId: 'TYAnqQ--KX0',
+		title: 'Knox Hill - Jenny & Screech Reaction & Breakdown',
+		channelName: 'Knox Hill',
+		categories: ['Lyrics Breakdown', 'Mental Health'],
+	},
+	{
+		id: 'example3',
+		songId: '0ivQwwgW4OY',
+		title: 'Opera Singer Reacts to Money Game',
+		channelName: 'A Charismatic Voice',
+		categories: [
+			'Vocal Analysis',
+			'First Time Reaction',
+			'Emotional Response',
+		],
+	},
+	{
+		id: 'example4',
+		songId: 'nyWbun_PbTc',
+		title: 'Money Game Part 3 - Real Rapper Reacts',
+		channelName: 'Black Pegasus',
+		categories: ['Lyrics Breakdown', 'Musical Analysis'],
+	},
+]
+
+const selectedSong = ref('')
+const selectedCategories = ref<string[]>([])
+
+const filteredReactions = computed(() => {
+	return reactions.filter((reaction) => {
+		const matchesSong =
+			!selectedSong.value || reaction.songId === selectedSong.value
+		const matchesCategories =
+			selectedCategories.value.length === 0 ||
+			selectedCategories.value.some((cat) =>
+				reaction.categories.includes(cat),
+			)
+		return matchesSong && matchesCategories
+	})
+})
+
+const toggleCategory = (category: string) => {
+	const index = selectedCategories.value.indexOf(category)
+	if (index === -1) {
+		selectedCategories.value.push(category)
+	} else {
+		selectedCategories.value.splice(index, 1)
+	}
+}
 </script>
 
 <template>
@@ -132,6 +202,81 @@ const features = [
 					:title="video.title"
 					:genre="video.genre"
 					:co-artists="video.coArtists"
+				/>
+			</div>
+		</section>
+
+		<!-- Reactions Section -->
+		<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+			<h2
+				class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white"
+			>
+				Community Reactions
+			</h2>
+			<p
+				class="mb-8 text-center text-xl text-gray-600 dark:text-gray-300"
+			>
+				"A rising tide lifts all ships" - Explore how the community
+				interprets and analyzes Ren's art
+			</p>
+
+			<!-- Filters -->
+			<div
+				class="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800"
+			>
+				<div class="mb-6">
+					<label
+						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Select a Song</label
+					>
+					<select
+						v-model="selectedSong"
+						class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+					>
+						<option value="">All Songs</option>
+						<option
+							v-for="video in videos"
+							:key="video.id"
+							:value="video.id"
+						>
+							{{ video.title }}
+						</option>
+					</select>
+				</div>
+
+				<div>
+					<label
+						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Filter by Category</label
+					>
+					<div class="flex flex-wrap gap-2">
+						<button
+							v-for="category in reactionCategories"
+							:key="category"
+							class="rounded-full px-4 py-2 text-sm transition-colors"
+							:class="[
+								selectedCategories.includes(category)
+									? 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-100'
+									: 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
+							]"
+							@click="toggleCategory(category)"
+						>
+							{{ category }}
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Reaction Videos Grid -->
+			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<ReactionCard
+					v-for="reaction in filteredReactions"
+					:id="reaction.id"
+					:key="reaction.id"
+					:title="reaction.title"
+					:channel-name="reaction.channelName"
+					:categories="reaction.categories"
+					:song-id="reaction.songId"
 				/>
 			</div>
 		</section>
