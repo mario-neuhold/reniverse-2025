@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Database } from '~/types/database.types'
+import type { VideoItem } from '~/types/youtube.types'
 
 type Song = Database['public']['Tables']['songs']['Row']
 
@@ -35,9 +36,7 @@ export const useSongsStore = defineStore('songs', {
 			}
 		},
 
-		async importVideos(
-			videos: Array<{ id: string; title: string; genres: string[] }>,
-		) {
+		async importVideos(videos: VideoItem[]) {
 			this.loading = true
 			this.error = null
 			let imported = 0

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSongsStore } from '~/stores/songs'
 import { useReactionsStore } from '~/stores/reactions'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 const songsStore = useSongsStore()
 const reactionsStore = useReactionsStore()
@@ -24,10 +25,12 @@ const extractPlaylistId = (input: string) => {
 	return null
 }
 
-const importPlaylist = async () => {
+const importPlaylist = async (e: FormSubmitEvent<typeof playlistInput>) => {
 	error.value = null
 	isLoading.value = true
 	importedItems.value = { songs: 0, reactions: 0 }
+
+	console.log(e)
 
 	try {
 		const playlistId = extractPlaylistId(playlistInput.value)
@@ -61,27 +64,25 @@ const importPlaylist = async () => {
 </script>
 
 <template>
-	<div class="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-		<h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-			Import from YouTube Playlist
-		</h3>
-		<form
+	<UPageCard
+		title="Import from YouTube Playlist"
+		class="mx-auto w-1/3"
+	>
+		<UForm
 			class="space-y-4"
+			:state="playlistInput"
 			@submit.prevent="importPlaylist"
 		>
 			<div>
-				<label
-					class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+				<UFormField
+					label="Playlist URL or ID"
+					required
 				>
-					Playlist URL or ID
-				</label>
-				<input
-					v-model="playlistInput"
-					type="text"
-					placeholder="Enter playlist URL or ID"
-					class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-					:disabled="isLoading"
-				/>
+					<UInput
+						v-model="playlistInput"
+						placeholder="Enter playlist URL or ID"
+					/>
+				</UFormField>
 			</div>
 
 			<div
@@ -106,14 +107,10 @@ const importPlaylist = async () => {
 				</ul>
 			</div>
 
-			<button
-				type="submit"
-				:disabled="isLoading"
-				class="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg px-4 py-2 font-semibold text-white disabled:opacity-50"
-			>
+			<UButton :disabled="isLoading">
 				<span v-if="isLoading">Importing...</span>
 				<span v-else>Import Playlist</span>
-			</button>
-		</form>
-	</div>
+			</UButton>
+		</UForm>
+	</UPageCard>
 </template>
