@@ -18,6 +18,7 @@ export const useReactionsStore = defineStore('reactions', {
 		reactions: [] as Reaction[],
 		selectedSong: '',
 		selectedCategories: [] as string[],
+		selectedChannel: '',
 		loading: false,
 		error: null as string | null,
 	}),
@@ -34,11 +35,53 @@ export const useReactionsStore = defineStore('reactions', {
 					state.selectedCategories.some((cat) =>
 						reaction.categories.includes(cat),
 					)
-				return matchesSong && matchesCategories
+				const matchesChannel =
+					!state.selectedChannel ||
+					reaction.channel_id === state.selectedChannel
+				return matchesSong && matchesCategories && matchesChannel
 			})
 		},
 		getReactionsBySong: (state) => (songId: string) =>
 			state.reactions.filter((reaction) => reaction.song_id === songId),
+		getReactionsByChannel: (state) => (channelId: string) =>
+			state.reactions.filter(
+				(reaction) => reaction.channel_id === channelId,
+			),
+		getReactionsByCategory: (state) => (category: string) =>
+			state.reactions.filter((reaction) =>
+				reaction.categories.includes(category),
+			),
+		getUniqueChannelNames: (state) => {
+			const channelNames = new Set<string>()
+			state.reactions.forEach((reaction) => {
+				if (reaction.channel_name) {
+					channelNames.add(reaction.channel_name)
+				}
+			})
+			return Array.from(channelNames).sort()
+		},
+		getChannelStats: (state) => (channelId: string) => {
+			const channelReactions = state.reactions.filter(
+				(reaction) => reaction.channel_id === channelId,
+			)
+
+			const uniqueSongs = new Set<string>()
+			const uniqueCategories = new Set<string>()
+
+			channelReactions.forEach((reaction) => {
+				uniqueSongs.add(reaction.song_id)
+				reaction.categories.forEach((category) => {
+					uniqueCategories.add(category)
+				})
+			})
+
+			return {
+				totalReactions: channelReactions.length,
+				uniqueSongCount: uniqueSongs.size,
+				uniqueCategoryCount: uniqueCategories.size,
+				categories: Array.from(uniqueCategories),
+			}
+		},
 	},
 	actions: {
 		async fetchReactions() {
@@ -95,7 +138,7 @@ export const useReactionsStore = defineStore('reactions', {
 				return imported
 			} catch (e) {
 				this.error = (e as Error).message
-				console.error('Error importing reactions:', e)
+				console.error('Error importing videos:', e)
 				return 0
 			} finally {
 				this.loading = false
@@ -128,31 +171,28 @@ export const useReactionsStore = defineStore('reactions', {
 			id: string,
 			updates: Partial<Omit<Reaction, 'id' | 'created_at'>>,
 		) {
-			this.loading = true
-			this.error = null
 			try {
 				const supabase = useSupabaseClient<Database>()
-				const { data, error } = await supabase
+				const { error } = await supabase
 					.from('reactions')
 					.update(updates)
 					.eq('id', id)
-					.select()
-					.single()
 
 				if (error) throw error
-				if (data) {
-					const index = this.reactions.findIndex(
-						(reaction) => reaction.id === id,
-					)
-					if (index !== -1) {
-						this.reactions[index] = data
+
+				// Update the reaction in the local state
+				const index = this.reactions.findIndex((r) => r.id === id)
+				if (index !== -1) {
+					this.reactions[index] = {
+						...this.reactions[index],
+						...updates,
 					}
 				}
+
+				return true
 			} catch (e) {
-				this.error = (e as Error).message
 				console.error('Error updating reaction:', e)
-			} finally {
-				this.loading = false
+				return false
 			}
 		},
 		async deleteReaction(id: string) {
@@ -179,6 +219,9 @@ export const useReactionsStore = defineStore('reactions', {
 		setSelectedSong(songId: string) {
 			this.selectedSong = songId
 		},
+		setSelectedChannel(channelId: string) {
+			this.selectedChannel = channelId
+		},
 		toggleCategory(category: string) {
 			const index = this.selectedCategories.indexOf(category)
 			if (index === -1) {
@@ -190,6 +233,25 @@ export const useReactionsStore = defineStore('reactions', {
 		clearFilters() {
 			this.selectedSong = ''
 			this.selectedCategories = []
+			this.selectedChannel = ''
+		},
+		async removeReaction(id: string) {
+			try {
+				const supabase = useSupabaseClient<Database>()
+				const { error } = await supabase
+					.from('reactions')
+					.delete()
+					.eq('id', id)
+
+				if (error) throw error
+
+				// Remove the reaction from the local state
+				this.reactions = this.reactions.filter((r) => r.id !== id)
+				return true
+			} catch (e) {
+				console.error('Error removing reaction:', e)
+				return false
+			}
 		},
 	},
 })
