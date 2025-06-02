@@ -9,6 +9,7 @@ export default defineNuxtConfig({
 		'@nuxt/test-utils',
 		'@pinia/nuxt',
 		'@nuxtjs/supabase',
+		'@nuxt/ui-pro',
 	],
 	css: ['~/assets/css/main.css'],
 	vite: {

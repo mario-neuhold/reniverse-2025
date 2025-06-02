@@ -3,6 +3,26 @@ import { useSongsStore } from '~/stores/songs'
 import { useReactionsStore } from '~/stores/reactions'
 import { useChannelsStore } from '~/stores/channels'
 
+const page = {
+	title: 'Reniverse - Genre-defying Music',
+	description:
+		'Explore the genre-defying music of Ren, blending hip-hop, folk, and alternative styles. Discover powerful narratives through music and community reactions.',
+	hero: {
+		links: [
+			{ label: 'Features', to: '#features' },
+			{ label: 'Music Videos', to: '#videos' },
+			{ label: 'Reactions', to: '#reactions' },
+		],
+	},
+}
+
+useSeoMeta({
+	title: page.title,
+	description: page.description,
+	ogTitle: page.title,
+	ogDescription: page.description,
+})
+
 const songsStore = useSongsStore()
 const reactionsStore = useReactionsStore()
 const channelsStore = useChannelsStore()
@@ -17,24 +37,35 @@ onMounted(async () => {
 })
 
 const videos = computed(() => songsStore.getAllSongs)
-const features = [
+const quotes = [
 	{
-		title: 'Genre-Blending Artist',
+		name: 'Andrew Lloyd Webber',
 		description:
-			'Ren seamlessly blends hip-hop, folk, and alternative styles to create a unique sound that defies traditional categorization.',
-		icon: 'i-heroicons-musical-note',
+			"Ren is one of the most unique songwriters and storytellers I've seen in recent times.",
+		icon: 'i-heroicons-lightning-bolt',
+		date: '2023-10-17',
 	},
 	{
-		title: 'Storytelling Through Music',
+		name: 'Robbie Williams',
 		description:
-			'Each song weaves intricate narratives that tackle complex themes, from personal struggles to societal issues.',
+			'Can this person be the next person to be the person pls? Asking for a friend.',
 		icon: 'i-heroicons-book-open',
+		date: '2022-09-21',
+		src: 'https://x.com/robbiewilliams/status/1572482296841650176',
 	},
 	{
-		title: 'Visual Artistry',
+		name: 'Sinéad O’Connor',
 		description:
-			'Compelling music videos that bring stories to life through creative visuals and powerful performances.',
+			"Holy motherfucking SHIT! Someone just showed me this at the weekend. This Archangel from like, twelfth heaven or somewhere, has only gone and made the entire history of songwriting and performing look like a three year old's birthday party at Burger King.",
 		icon: 'i-heroicons-video-camera',
+		date: '2023-05-17',
+	},
+	{
+		name: 'Sinéad O’Connor',
+		description:
+			'Every song and or artist in history even Willie Dixon, Chuck Berry, The Beatles, NWA, Ice Cube, and even Bob Dylan, is officially relegated to class B. As are every actor in history or legend: living or dead, male or female. We all are now defunct.',
+		icon: 'i-heroicons-video-camera',
+		date: '2023-05-17',
 	},
 ]
 
@@ -60,53 +91,55 @@ const isSelectedCategory = (category: string) =>
 </script>
 
 <template>
-	<div
-		class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
-	>
+	<div>
 		<!-- Hero Section -->
-		<header class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-			<div class="text-center">
-				<h1
-					class="mb-6 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white"
-				>
-					Ren
-				</h1>
-				<p
-					class="mx-auto mb-10 max-w-3xl text-xl text-gray-600 dark:text-gray-300"
-				>
-					Genre-defying musician blending hip-hop, folk, and
-					alternative styles to create powerful narratives through
-					music.
-				</p>
-				<div class="flex justify-center gap-4">
-					<BaseButton to="#videos">Watch Videos</BaseButton>
-				</div>
-			</div>
-		</header>
+		<UPageHero
+			:description="page.description"
+			:ui="{
+				container: 'md:pt-18 lg:pt-20',
+				title: 'mx-auto max-w-3xl *:leading-11 sm:*:leading-19',
+			}"
+		>
+			<template #title>
+				Welcome to the universe of Ren:<br />
+				<span class="text-primary">The Reniverse</span>
+			</template>
+		</UPageHero>
 
-		<!-- Features Section -->
-		<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+		<!-- Quotes Section with color bg -->
+		<USeparator :ui="{ border: 'border-primary/30' }" />
+		<UPageSection
+			id="quotes"
+			class="relative overflow-hidden"
+		>
+			<div
+				class="bg-primary absolute top-10 -left-10 z-10 size-[300px] rounded-full opacity-30 blur-[200px]"
+			/>
+			<div
+				class="bg-primary absolute -right-10 -bottom-10 z-10 size-[300px] rounded-full opacity-30 blur-[200px]"
+			/>
 			<h2
 				class="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white"
 			>
-				About the Artist
+				What celebrities are saying about
+				<span class="text-primary">Ren</span>
 			</h2>
-			<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-				<FeatureCard
-					v-for="feature in features"
-					:key="feature.title"
-					:title="feature.title"
-					:description="feature.description"
-					:icon="feature.icon"
-				/>
+			<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+				<UPageCard
+					v-for="(quote, index) in quotes"
+					:key="quote.id || index"
+					:title="quote.name"
+					:description="quote.date"
+					spotlight
+					spotlight-color="primary"
+					>{{ quote.description }}</UPageCard
+				>
 			</div>
-		</section>
+		</UPageSection>
+		<USeparator :ui="{ border: 'border-primary/30' }" />
 
 		<!-- Videos Section -->
-		<section
-			id="videos"
-			class="mx-auto max-w-7xl rounded-xl bg-gray-50 px-4 py-16 sm:px-6 lg:px-8 dark:bg-gray-900"
-		>
+		<UPageSection id="videos">
 			<h2
 				class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white"
 			>
@@ -142,10 +175,10 @@ const isSelectedCategory = (category: string) =>
 					:co-artists="video.co_artists"
 				/>
 			</div>
-		</section>
+		</UPageSection>
 
 		<!-- Reactions Section -->
-		<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+		<UPageSection id="reactions">
 			<h2
 				class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white"
 			>
@@ -258,7 +291,7 @@ const isSelectedCategory = (category: string) =>
 					:song-id="reaction.song_id"
 				/>
 			</div>
-		</section>
+		</UPageSection>
 
 		<!-- Footer -->
 		<footer class="mt-20 bg-gray-100 py-8 dark:bg-gray-800">

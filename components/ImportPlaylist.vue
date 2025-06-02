@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { useSongsStore } from '~/stores/songs'
 import { useReactionsStore } from '~/stores/reactions'
+import type { FormSubmitEvent } from '@nuxt/ui'
+import type { VideoItem } from '~/types/youtube.types'
 
 const songsStore = useSongsStore()
 const reactionsStore = useReactionsStore()
 
-const playlistInput = ref('')
+const state = reactive({
+	playlistInput: '',
+})
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const importedItems = ref<{ songs: number; reactions: number }>({
@@ -24,13 +28,15 @@ const extractPlaylistId = (input: string) => {
 	return null
 }
 
-const importPlaylist = async () => {
+const importPlaylist = async (e: FormSubmitEvent<typeof state>) => {
 	error.value = null
 	isLoading.value = true
 	importedItems.value = { songs: 0, reactions: 0 }
 
+	console.error(e)
+
 	try {
-		const playlistId = extractPlaylistId(playlistInput.value)
+		const playlistId = extractPlaylistId(state.playlistInput)
 		if (!playlistId) {
 			throw new Error('Invalid playlist URL or ID')
 		}
@@ -41,9 +47,15 @@ const importPlaylist = async () => {
 			throw new Error('Failed to fetch playlist data')
 		}
 
+		// Convert serialized data back to proper types
+		const playlistData = data.value as {
+			songs: VideoItem[]
+			reactions: VideoItem[]
+		}
+
 		const results = await Promise.all([
-			songsStore.importVideos(data.value.songs),
-			reactionsStore.importVideos(data.value.reactions),
+			songsStore.importVideos(playlistData.songs),
+			reactionsStore.importVideos(playlistData.reactions),
 		])
 
 		importedItems.value = {
@@ -51,7 +63,7 @@ const importPlaylist = async () => {
 			reactions: results[1],
 		}
 
-		playlistInput.value = ''
+		state.playlistInput = ''
 	} catch (e) {
 		error.value = e instanceof Error ? e.message : 'An error occurred'
 	} finally {
@@ -61,27 +73,26 @@ const importPlaylist = async () => {
 </script>
 
 <template>
-	<div class="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-		<h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-			Import from YouTube Playlist
-		</h3>
-		<form
+	<UPageCard
+		title="Import from YouTube Playlist"
+		class="mx-auto w-1/3"
+	>
+		<UForm
 			class="space-y-4"
+			:state="state"
 			@submit.prevent="importPlaylist"
 		>
 			<div>
-				<label
-					class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+				<UFormField
+					label="Playlist URL or ID"
+					name="playlistInput"
+					required
 				>
-					Playlist URL or ID
-				</label>
-				<input
-					v-model="playlistInput"
-					type="text"
-					placeholder="Enter playlist URL or ID"
-					class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-					:disabled="isLoading"
-				/>
+					<UInput
+						v-model="state.playlistInput"
+						placeholder="Enter playlist URL or ID"
+					/>
+				</UFormField>
 			</div>
 
 			<div
@@ -106,14 +117,10 @@ const importPlaylist = async () => {
 				</ul>
 			</div>
 
-			<BaseButton
-				type="submit"
-				:disabled="isLoading"
-				variant="inverted"
-			>
+			<UButton :disabled="isLoading">
 				<span v-if="isLoading">Importing...</span>
 				<span v-else>Import Playlist</span>
-			</BaseButton>
-		</form>
-	</div>
+			</UButton>
+		</UForm>
+	</UPageCard>
 </template>
