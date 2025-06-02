@@ -126,8 +126,8 @@ const isSelectedCategory = (category: string) =>
 			</h2>
 			<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
 				<UPageCard
-					v-for="quote in quotes"
-					:key="quote.name"
+					v-for="(quote, index) in quotes"
+					:key="quote.id || index"
 					:title="quote.name"
 					:description="quote.date"
 					spotlight
