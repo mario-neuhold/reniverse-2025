@@ -95,13 +95,14 @@ const isSelectedCategory = (category: string) =>
 		<!-- Hero Section -->
 		<UPageHero
 			:description="page.description"
-			:ui="{ container: 'md:pt-18 lg:pt-20' }"
+			:ui="{
+				container: 'md:pt-18 lg:pt-20',
+				title: 'mx-auto max-w-3xl *:leading-11 sm:*:leading-19',
+			}"
 		>
 			<template #title>
-				<h1 class="mx-auto max-w-3xl *:leading-11 sm:*:leading-19">
-					Welcome to the universe of Ren:<br />
-					<span class="text-primary">The Reniverse</span>
-				</h1>
+				Welcome to the universe of Ren:<br />
+				<span class="text-primary">The Reniverse</span>
 			</template>
 		</UPageHero>
 
