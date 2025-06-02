@@ -80,7 +80,7 @@ const importPlaylist = async (e: FormSubmitEvent<typeof state>) => {
 		<UForm
 			class="space-y-4"
 			:state="state"
-			@submit="importPlaylist"
+			@submit.prevent="importPlaylist"
 		>
 			<div>
 				<UFormField
