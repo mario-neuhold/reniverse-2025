@@ -1,6 +1,35 @@
 export interface Database {
 	public: {
 		Tables: {
+			channels: {
+				Row: {
+					id: string
+					name: string
+					youtube_id: string | null
+					avatar_url: string | null
+					categories: string[]
+					description: string | null
+					created_at: string
+				}
+				Insert: {
+					id: string
+					name: string
+					youtube_id?: string | null
+					avatar_url?: string | null
+					categories: string[]
+					description?: string | null
+					created_at?: string
+				}
+				Update: {
+					id?: string
+					name?: string
+					youtube_id?: string | null
+					avatar_url?: string | null
+					categories?: string[]
+					description?: string | null
+					created_at?: string
+				}
+			}
 			songs: {
 				Row: {
 					id: string
@@ -30,6 +59,7 @@ export interface Database {
 					song_id: string
 					title: string
 					channel_name: string
+					channel_id: string | null
 					categories: string[]
 					created_at: string
 				}
@@ -38,6 +68,7 @@ export interface Database {
 					song_id: string
 					title: string
 					channel_name: string
+					channel_id?: string | null
 					categories: string[]
 					created_at?: string
 				}
@@ -46,6 +77,7 @@ export interface Database {
 					song_id?: string
 					title?: string
 					channel_name?: string
+					channel_id?: string | null
 					categories?: string[]
 					created_at?: string
 				}

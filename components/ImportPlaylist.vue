@@ -106,14 +106,14 @@ const importPlaylist = async () => {
 				</ul>
 			</div>
 
-			<button
+			<BaseButton
 				type="submit"
 				:disabled="isLoading"
-				class="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg px-4 py-2 font-semibold text-white disabled:opacity-50"
+				variant="inverted"
 			>
 				<span v-if="isLoading">Importing...</span>
 				<span v-else>Import Playlist</span>
-			</button>
+			</BaseButton>
 		</form>
 	</div>
 </template>

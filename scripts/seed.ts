@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '../types/database.types'
 
+// Note: We're still using createClient in this script because it runs outside of the Nuxt runtime
+// If this script needs to be executed within the Nuxt context, replace with useSupabaseClient()
 const supabaseUrl = 'https://zkylalaehbdzthgclexo.supabase.co'
 const supabaseKey =
 	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpreWxhbGFlaGJkenRoZ2NsZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI2OTU1MjEsImV4cCI6MjA1ODI3MTUyMX0.r_t2HjtwAAf1HbHMTkEvIks7bkEHytbKFYEf5tqy-Uo'
-
 const supabase = createClient<Database>(supabaseUrl, supabaseKey)
 
 const initialSongs = [

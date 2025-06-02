@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { useSongsStore } from '~/stores/songs'
 import { useReactionsStore } from '~/stores/reactions'
+import { useChannelsStore } from '~/stores/channels'
 
 const songsStore = useSongsStore()
 const reactionsStore = useReactionsStore()
+const channelsStore = useChannelsStore()
 
 // Fetch data on component mount
 onMounted(async () => {
 	await Promise.all([
 		songsStore.fetchSongs(),
 		reactionsStore.fetchReactions(),
+		channelsStore.fetchChannels(),
 	])
 })
 
@@ -43,6 +46,11 @@ const error = computed(() => songsStore.error || reactionsStore.error)
 const selectedSong = computed({
 	get: () => reactionsStore.selectedSong,
 	set: (value) => reactionsStore.setSelectedSong(value),
+})
+
+const selectedChannel = computed({
+	get: () => reactionsStore.selectedChannel,
+	set: (value) => reactionsStore.setSelectedChannel(value),
 })
 
 const toggleCategory = (category: string) =>
@@ -175,6 +183,27 @@ const isSelectedCategory = (category: string) =>
 					</select>
 				</div>
 
+				<div class="mb-6">
+					<label
+						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+					>
+						Filter by Channel
+					</label>
+					<select
+						v-model="selectedChannel"
+						class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+					>
+						<option value="">All Channels</option>
+						<option
+							v-for="channel in channelsStore.getAllChannels"
+							:key="channel.id"
+							:value="channel.id"
+						>
+							{{ channel.name }}
+						</option>
+					</select>
+				</div>
+
 				<div>
 					<label
 						class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -224,6 +253,7 @@ const isSelectedCategory = (category: string) =>
 					:key="reaction.id"
 					:title="reaction.title"
 					:channel-name="reaction.channel_name"
+					:channel-id="reaction.channel_id"
 					:categories="reaction.categories"
 					:song-id="reaction.song_id"
 				/>

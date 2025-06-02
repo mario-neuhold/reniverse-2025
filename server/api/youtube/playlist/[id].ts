@@ -1,6 +1,7 @@
 import { google } from 'googleapis'
-import { createClient } from '@supabase/supabase-js'
+import { serverSupabaseClient } from '#supabase/server'
 import type { Database } from '~/types/database.types'
+import { nanoid } from 'nanoid'
 
 interface VideoItem {
 	id: string
@@ -8,6 +9,7 @@ interface VideoItem {
 	genres?: string[]
 	co_artists?: string[]
 	channel_name?: string
+	channel_id?: string
 	song_id?: string
 	categories?: string[]
 }
@@ -17,13 +19,22 @@ interface Song {
 	title: string
 }
 
+interface Channel {
+	id: string
+	name: string
+	youtube_id: string
+	categories: string[]
+	avatar_url?: string
+	description?: string
+}
+
 const youtube = google.youtube('v3')
-const REN_CHANNEL_ID = 'UCEUNy-tJh9Q2tEDS8pfcp4w' // RenMakesMusic channel ID
+const REN_CHANNEL_ID = 'UCBYGhpDjm4QkhdfMdlNVTNQ' // RenMakesMusic channel ID
 
 // Helper function to try to match a reaction video to its original song
 const findMatchingSongId = async (
 	title: string,
-	supabase: ReturnType<typeof createClient<Database>>,
+	supabase: ReturnType<typeof serverSupabaseClient<Database>>,
 ) => {
 	// Get all songs from the database
 	const { data: songs } = await supabase.from('songs').select('id, title')
@@ -36,6 +47,43 @@ const findMatchingSongId = async (
 			title.toLowerCase().includes(song.title.toLowerCase()),
 		)?.id || null
 	)
+}
+
+// Helper to create or get a channel
+const getOrCreateChannel = async (
+	channelInfo: {
+		name: string
+		youtubeId: string
+	},
+	supabase: ReturnType<typeof serverSupabaseClient<Database>>,
+) => {
+	// Try to find existing channel by YouTube ID
+	const { data: existingChannel } = await supabase
+		.from('channels')
+		.select('*')
+		.eq('youtube_id', channelInfo.youtubeId)
+		.single()
+
+	if (existingChannel) {
+		return existingChannel.id
+	}
+
+	// Create a new channel
+	const newChannel: Omit<Channel, 'created_at'> = {
+		id: `ch_${nanoid(10)}`,
+		name: channelInfo.name,
+		youtube_id: channelInfo.youtubeId,
+		categories: ['To be classified'],
+	}
+
+	const { error } = await supabase.from('channels').insert(newChannel)
+
+	if (error) {
+		console.error('Error creating channel:', error)
+		return null
+	}
+
+	return newChannel.id
 }
 
 export default defineEventHandler(async (event) => {
@@ -53,13 +101,7 @@ export default defineEventHandler(async (event) => {
 			throw new Error('YouTube API key is not configured')
 		}
 
-		const supabaseUrl = process.env.SUPABASE_URL
-		const supabaseKey = process.env.SUPABASE_KEY
-		if (!supabaseUrl || !supabaseKey) {
-			throw new Error('Supabase configuration is missing')
-		}
-
-		const supabase = createClient<Database>(supabaseUrl, supabaseKey)
+		const supabase = await serverSupabaseClient<Database>(event)
 
 		const response = await youtube.playlistItems.list({
 			key: apiKey,
@@ -74,6 +116,10 @@ export default defineEventHandler(async (event) => {
 
 		const songs: VideoItem[] = []
 		const reactions: VideoItem[] = []
+		const channelsToProcess = new Map<
+			string,
+			{ name: string; youtubeId: string }
+		>()
 
 		// First pass: collect all songs
 		for (const item of response.data.items) {
@@ -95,22 +141,40 @@ export default defineEventHandler(async (event) => {
 					title: videoData.title,
 					genres: ['To be classified'],
 				})
+			} else if (snippet.videoOwnerChannelId) {
+				// Store channel info for processing
+				channelsToProcess.set(snippet.videoOwnerChannelId, {
+					name: snippet.videoOwnerChannelTitle || 'Unknown Channel',
+					youtubeId: snippet.videoOwnerChannelId,
+				})
 			}
 		}
 
 		// First, insert all songs so they're available for reactions to reference
 		if (songs.length > 0) {
-			const { error: songsError } = await supabase
-				.from('songs')
-				.upsert(songs, { onConflict: 'id' })
-
+			const { error: songsError } = await supabase.from('songs').upsert(
+				songs.map((song) => ({ ...song, genres: song.genres || [] })),
+				{ onConflict: 'id' },
+			) // Ensure genres is always a string[]
 			if (songsError) {
 				console.error('Error inserting songs:', songsError)
 				throw songsError
 			}
 		}
 
-		// Second pass: process reactions and try to match them to songs
+		// Process all channels
+		const channelIdMap = new Map<string, string>() // Maps YouTube channel IDs to our DB channel IDs
+		for (const [
+			youtubeChannelId,
+			channelInfo,
+		] of channelsToProcess.entries()) {
+			const dbChannelId = await getOrCreateChannel(channelInfo, supabase)
+			if (dbChannelId) {
+				channelIdMap.set(youtubeChannelId, dbChannelId)
+			}
+		}
+
+		// Second pass: process reactions and associate with channels
 		for (const item of response.data.items) {
 			const videoId = item.contentDetails?.videoId
 			const snippet = item.snippet
@@ -130,12 +194,17 @@ export default defineEventHandler(async (event) => {
 			)
 
 			// Only add reactions that we can match to a song
-			if (songId) {
+			if (songId && snippet.videoOwnerChannelId) {
+				const dbChannelId = channelIdMap.get(
+					snippet.videoOwnerChannelId,
+				)
+
 				reactions.push({
 					id: videoId,
 					title: snippet.title || '',
 					channel_name:
 						snippet.videoOwnerChannelTitle || 'Unknown Channel',
+					channel_id: dbChannelId,
 					song_id: songId,
 					categories: ['To be classified'],
 				})
