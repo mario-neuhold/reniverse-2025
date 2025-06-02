@@ -33,7 +33,7 @@ const importPlaylist = async (e: FormSubmitEvent<typeof state>) => {
 	isLoading.value = true
 	importedItems.value = { songs: 0, reactions: 0 }
 
-	console.log(e)
+	console.error(e)
 
 	try {
 		const playlistId = extractPlaylistId(state.playlistInput)
