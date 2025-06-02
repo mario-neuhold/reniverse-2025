@@ -6,6 +6,7 @@ export interface VideoItem {
 	genres?: string[]
 	co_artists?: string[]
 	channel_name?: string
+	channel_id: string
 	song_id?: string
 	categories?: string[]
 }

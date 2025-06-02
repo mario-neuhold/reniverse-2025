@@ -2,11 +2,14 @@
 import { useSongsStore } from '~/stores/songs'
 import { useReactionsStore } from '~/stores/reactions'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type { VideoItem } from '~/types/youtube.types'
 
 const songsStore = useSongsStore()
 const reactionsStore = useReactionsStore()
 
-const playlistInput = ref('')
+const state = reactive({
+	playlistInput: '',
+})
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const importedItems = ref<{ songs: number; reactions: number }>({
@@ -25,7 +28,7 @@ const extractPlaylistId = (input: string) => {
 	return null
 }
 
-const importPlaylist = async (e: FormSubmitEvent<typeof playlistInput>) => {
+const importPlaylist = async (e: FormSubmitEvent<typeof state>) => {
 	error.value = null
 	isLoading.value = true
 	importedItems.value = { songs: 0, reactions: 0 }
@@ -33,7 +36,7 @@ const importPlaylist = async (e: FormSubmitEvent<typeof playlistInput>) => {
 	console.log(e)
 
 	try {
-		const playlistId = extractPlaylistId(playlistInput.value)
+		const playlistId = extractPlaylistId(state.playlistInput)
 		if (!playlistId) {
 			throw new Error('Invalid playlist URL or ID')
 		}
@@ -44,9 +47,15 @@ const importPlaylist = async (e: FormSubmitEvent<typeof playlistInput>) => {
 			throw new Error('Failed to fetch playlist data')
 		}
 
+		// Convert serialized data back to proper types
+		const playlistData = data.value as {
+			songs: VideoItem[]
+			reactions: VideoItem[]
+		}
+
 		const results = await Promise.all([
-			songsStore.importVideos(data.value.songs),
-			reactionsStore.importVideos(data.value.reactions),
+			songsStore.importVideos(playlistData.songs),
+			reactionsStore.importVideos(playlistData.reactions),
 		])
 
 		importedItems.value = {
@@ -54,7 +63,7 @@ const importPlaylist = async (e: FormSubmitEvent<typeof playlistInput>) => {
 			reactions: results[1],
 		}
 
-		playlistInput.value = ''
+		state.playlistInput = ''
 	} catch (e) {
 		error.value = e instanceof Error ? e.message : 'An error occurred'
 	} finally {
@@ -70,16 +79,17 @@ const importPlaylist = async (e: FormSubmitEvent<typeof playlistInput>) => {
 	>
 		<UForm
 			class="space-y-4"
-			:state="playlistInput"
-			@submit.prevent="importPlaylist"
+			:state="state"
+			@submit="importPlaylist"
 		>
 			<div>
 				<UFormField
 					label="Playlist URL or ID"
+					name="playlistInput"
 					required
 				>
 					<UInput
-						v-model="playlistInput"
+						v-model="state.playlistInput"
 						placeholder="Enter playlist URL or ID"
 					/>
 				</UFormField>
