@@ -23,10 +23,16 @@ const channel = computed(() => {
 </script>
 
 <template>
-	<div
-		class="group overflow-hidden rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800"
+	<UPageCard
+		:ui="{
+			body: 'relative aspect-video w-full',
+			header: 'font-bold',
+		}"
 	>
-		<div class="relative aspect-video w-full">
+		<template #header>
+			{{ title }}
+		</template>
+		<template #body>
 			<iframe
 				v-if="isPlaying"
 				:src="`https://www.youtube.com/embed/${id}?autoplay=1`"
@@ -56,14 +62,8 @@ const channel = computed(() => {
 					</div>
 				</div>
 			</button>
-		</div>
-		<div class="p-4">
-			<h3
-				class="mb-2 text-lg font-semibold text-gray-900 dark:text-white"
-			>
-				{{ title }}
-			</h3>
-
+		</template>
+		<template #footer>
 			<!-- Channel information -->
 			<div class="mb-3 flex items-center">
 				<NuxtLink
@@ -114,6 +114,6 @@ const channel = computed(() => {
 					{{ category }}
 				</span>
 			</div>
-		</div>
-	</div>
+		</template>
+	</UPageCard>
 </template>
