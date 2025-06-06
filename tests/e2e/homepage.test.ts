@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test('home page displays correctly', async ({ page }) => {
-	await page.goto('http://localhost:3000')
+	await page.goto('/')
 
 	// Check if the page title is correct
 	await expect(page).toHaveTitle(/Reniverse/)
@@ -12,7 +12,7 @@ test('home page displays correctly', async ({ page }) => {
 })
 
 test('navigation works correctly', async ({ page }) => {
-	await page.goto('http://localhost:3000')
+	await page.goto('/')
 
 	// Test navigation to channels page if it exists
 	const channelsLink = page.locator('a[href*="channels"]').first()
@@ -24,7 +24,7 @@ test('navigation works correctly', async ({ page }) => {
 })
 
 test('responsive design works', async ({ page }) => {
-	await page.goto('http://localhost:3000')
+	await page.goto('/')
 
 	// Test mobile viewport
 	await page.setViewportSize({ width: 375, height: 667 })
