@@ -4,15 +4,13 @@ import ImportPlaylist from '@/components/ImportPlaylist.vue'
 import { useSongsStore } from '@/stores/songs'
 import { useReactionsStore } from '@/stores/reactions'
 
-// Mock the fetch function
-const mockFetch = vi.fn()
-vi.stubGlobal('$fetch', mockFetch)
-global.fetch = mockFetch
-
 // Mock the useFetch composable
+const mockUseFetch = vi.fn()
 vi.mock('#app/composables', () => ({
-	useFetch: vi.fn(),
+	useFetch: mockUseFetch,
 }))
+
+global.useFetch = mockUseFetch
 
 describe('ImportPlaylist', () => {
 	beforeEach(() => {
@@ -74,8 +72,6 @@ describe('ImportPlaylist', () => {
 	})
 
 	it('displays loading state when importing', async () => {
-		const mockUseFetch = vi.mocked(useFetch)
-		
 		// Mock useFetch to return a promise that doesn't resolve immediately
 		mockUseFetch.mockReturnValue({
 			data: ref(null),
@@ -115,7 +111,6 @@ describe('ImportPlaylist', () => {
 	})
 
 	it('displays success message after successful import', async () => {
-		const mockUseFetch = vi.mocked(useFetch)
 		const songsStore = useSongsStore()
 		const reactionsStore = useReactionsStore()
 
@@ -154,8 +149,6 @@ describe('ImportPlaylist', () => {
 	})
 
 	it('displays error message when API call fails', async () => {
-		const mockUseFetch = vi.mocked(useFetch)
-
 		// Mock failed API response
 		mockUseFetch.mockReturnValue({
 			data: ref(null),
@@ -182,7 +175,6 @@ describe('ImportPlaylist', () => {
 	})
 
 	it('clears input after successful import', async () => {
-		const mockUseFetch = vi.mocked(useFetch)
 		const songsStore = useSongsStore()
 		const reactionsStore = useReactionsStore()
 
@@ -218,7 +210,6 @@ describe('ImportPlaylist', () => {
 	})
 
 	it('handles store import errors gracefully', async () => {
-		const mockUseFetch = vi.mocked(useFetch)
 		const songsStore = useSongsStore()
 
 		// Mock successful API response

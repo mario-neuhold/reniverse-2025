@@ -58,8 +58,8 @@ describe('VideoCard', () => {
 		expect(iframe.exists()).toBe(true)
 		expect(iframe.attributes('src')).toBe('https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1')
 
-		// Play button should be hidden
-		expect(playButton.isVisible()).toBe(false)
+		// Play button should be hidden (but still in DOM with v-show)
+		expect(playButton.element.style.display).toBe('none')
 	})
 
 	it('displays genre tags correctly', async () => {
