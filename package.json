@@ -28,8 +28,9 @@
 		"vue": "^3.5.16",
 		"vue-router": "^4.5.1"
 	},
-	"packageManager": "pnpm@8.7.5+sha1.735d4d0e6fc66c4d2d64b269b08e5995b19230ca",
+	"packageManager": "pnpm@10.13.1",
 	"devDependencies": {
+		"@iconify-json/lucide": "^1.2.57",
 		"@nuxt/test-utils": "3.19.1",
 		"@playwright/test": "^1.52.0",
 		"@vue/test-utils": "^2.4.6",
