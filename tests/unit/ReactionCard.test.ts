@@ -26,7 +26,9 @@ describe('ReactionCard', () => {
 		// Test content is correctly displayed from props
 		expect(wrapper.text()).toContain('Test Reaction Video')
 		expect(wrapper.text()).toContain('Test Channel')
-		expect(wrapper.find('img').attributes('alt')).toBe('Test Reaction Video')
+		expect(wrapper.find('img').attributes('alt')).toBe(
+			'Test Reaction Video',
+		)
 	})
 
 	it('displays correct YouTube thumbnail URL', async () => {
@@ -36,7 +38,9 @@ describe('ReactionCard', () => {
 
 		const img = wrapper.find('img')
 		expect(img.exists()).toBe(true)
-		expect(img.attributes('src')).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
+		expect(img.attributes('src')).toBe(
+			'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+		)
 	})
 
 	it('shows play button by default and hides video iframe', async () => {
@@ -66,7 +70,9 @@ describe('ReactionCard', () => {
 		// iframe should now be present
 		const iframe = wrapper.find('iframe')
 		expect(iframe.exists()).toBe(true)
-		expect(iframe.attributes('src')).toBe('https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1')
+		expect(iframe.attributes('src')).toBe(
+			'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1',
+		)
 
 		// Play button should be hidden (but still in DOM with v-show)
 		expect(playButton.element.style.display).toBe('none')
@@ -93,7 +99,7 @@ describe('ReactionCard', () => {
 
 		// Should display channel name as plain text
 		expect(wrapper.text()).toContain('Test Channel')
-		
+
 		// Should not have a NuxtLink
 		const channelLink = wrapper.find('a')
 		expect(channelLink.exists()).toBe(false)
@@ -106,7 +112,7 @@ describe('ReactionCard', () => {
 
 		// Should display channel name as a link
 		expect(wrapper.text()).toContain('Test Channel')
-		
+
 		// Should have a NuxtLink to the channel page
 		const channelLink = wrapper.find('a')
 		expect(channelLink.exists()).toBe(true)
@@ -115,15 +121,17 @@ describe('ReactionCard', () => {
 
 	it('displays channel categories when channel data is available in store', async () => {
 		const channelsStore = useChannelsStore()
-		
+
 		// Mock channel data in the store
-		channelsStore.channels = [{
-			id: 'test-channel-id',
-			name: 'Test Channel',
-			youtube_id: 'test-youtube-id',
-			categories: ['Reactor', 'Music Lover'],
-			avatar_url: 'https://example.com/avatar.jpg',
-		}]
+		channelsStore.channels = [
+			{
+				id: 'test-channel-id',
+				name: 'Test Channel',
+				youtube_id: 'test-youtube-id',
+				categories: ['Reactor', 'Music Lover'],
+				avatar_url: 'https://example.com/avatar.jpg',
+			},
+		]
 
 		const wrapper = await mountSuspended(ReactionCard, {
 			props: defaultProps,
@@ -138,15 +146,17 @@ describe('ReactionCard', () => {
 
 	it('displays channel avatar when available in store', async () => {
 		const channelsStore = useChannelsStore()
-		
+
 		// Mock channel data in the store with avatar
-		channelsStore.channels = [{
-			id: 'test-channel-id',
-			name: 'Test Channel',
-			youtube_id: 'test-youtube-id',
-			categories: ['Reactor'],
-			avatar_url: 'https://example.com/avatar.jpg',
-		}]
+		channelsStore.channels = [
+			{
+				id: 'test-channel-id',
+				name: 'Test Channel',
+				youtube_id: 'test-youtube-id',
+				categories: ['Reactor'],
+				avatar_url: 'https://example.com/avatar.jpg',
+			},
+		]
 
 		const wrapper = await mountSuspended(ReactionCard, {
 			props: defaultProps,
@@ -155,7 +165,9 @@ describe('ReactionCard', () => {
 		// Should display channel avatar
 		const avatarImg = wrapper.find('.h-5.w-5 img')
 		expect(avatarImg.exists()).toBe(true)
-		expect(avatarImg.attributes('src')).toBe('https://example.com/avatar.jpg')
+		expect(avatarImg.attributes('src')).toBe(
+			'https://example.com/avatar.jpg',
+		)
 		expect(avatarImg.attributes('alt')).toBe('Test Channel')
 	})
 
@@ -167,7 +179,7 @@ describe('ReactionCard', () => {
 		// Should still render without errors
 		expect(wrapper.text()).toContain('Test Reaction Video')
 		expect(wrapper.text()).toContain('Test Channel')
-		
+
 		// Should not display channel categories when channel not found in store
 		const channelCategoryTags = wrapper.findAll('.bg-purple-100')
 		expect(channelCategoryTags).toHaveLength(0)

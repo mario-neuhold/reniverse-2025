@@ -26,7 +26,9 @@ describe('VideoCard', () => {
 
 		const img = wrapper.find('img')
 		expect(img.exists()).toBe(true)
-		expect(img.attributes('src')).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
+		expect(img.attributes('src')).toBe(
+			'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+		)
 	})
 
 	it('shows play button by default and hides video iframe', async () => {
@@ -56,7 +58,9 @@ describe('VideoCard', () => {
 		// iframe should now be present
 		const iframe = wrapper.find('iframe')
 		expect(iframe.exists()).toBe(true)
-		expect(iframe.attributes('src')).toBe('https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1')
+		expect(iframe.attributes('src')).toBe(
+			'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1',
+		)
 
 		// Play button should be hidden (but still in DOM with v-show)
 		expect(playButton.element.style.display).toBe('none')

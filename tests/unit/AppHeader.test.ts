@@ -32,7 +32,7 @@ describe('AppHeader', () => {
 
 		// Test that the main brand link is present
 		expect(wrapper.text()).toContain('Reniverse')
-		
+
 		// Test that the home link exists
 		const homeLink = wrapper.find('a[href="/"]')
 		expect(homeLink.exists()).toBe(true)
@@ -88,7 +88,7 @@ describe('AppHeader', () => {
 
 	it('activates quotes section when quotes heading is active but not videos', async () => {
 		mockActiveHeadings.value = ['quotes']
-		
+
 		const wrapper = await mountSuspended(AppHeader)
 		const vm = wrapper.vm as any
 
@@ -99,7 +99,7 @@ describe('AppHeader', () => {
 
 	it('activates videos section when videos heading is active', async () => {
 		mockActiveHeadings.value = ['videos']
-		
+
 		const wrapper = await mountSuspended(AppHeader)
 		const vm = wrapper.vm as any
 
@@ -110,7 +110,7 @@ describe('AppHeader', () => {
 
 	it('activates reactions section when reactions heading is active but not videos', async () => {
 		mockActiveHeadings.value = ['reactions']
-		
+
 		const wrapper = await mountSuspended(AppHeader)
 		const vm = wrapper.vm as any
 
@@ -121,7 +121,7 @@ describe('AppHeader', () => {
 
 	it('prioritizes videos over other sections when multiple headings are active', async () => {
 		mockActiveHeadings.value = ['quotes', 'videos', 'reactions']
-		
+
 		const wrapper = await mountSuspended(AppHeader)
 		const vm = wrapper.vm as any
 
@@ -135,14 +135,14 @@ describe('AppHeader', () => {
 		const mockQuotesElement = { id: 'quotes' }
 		const mockVideosElement = { id: 'videos' }
 		const mockReactionsElement = { id: 'reactions' }
-		
+
 		vi.spyOn(document, 'querySelector')
 			.mockReturnValueOnce(mockQuotesElement as any)
 			.mockReturnValueOnce(mockVideosElement as any)
 			.mockReturnValueOnce(mockReactionsElement as any)
 
 		const wrapper = await mountSuspended(AppHeader)
-		
+
 		// Simulate page:finish hook manually since nuxtApp.hooks is complex in tests
 		// This is a simplified test that verifies the component mounts without errors
 		expect(wrapper.exists()).toBe(true)

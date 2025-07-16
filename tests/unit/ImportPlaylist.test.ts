@@ -16,7 +16,7 @@ describe('ImportPlaylist', () => {
 	beforeEach(() => {
 		// Set up Pinia store for each test
 		setActivePinia(createPinia())
-		
+
 		// Reset mocks
 		vi.clearAllMocks()
 	})
@@ -26,7 +26,11 @@ describe('ImportPlaylist', () => {
 
 		// Test form elements are present
 		expect(wrapper.text()).toContain('Import from YouTube Playlist')
-		expect(wrapper.find('input[placeholder="Enter playlist URL or ID"]').exists()).toBe(true)
+		expect(
+			wrapper
+				.find('input[placeholder="Enter playlist URL or ID"]')
+				.exists(),
+		).toBe(true)
 		expect(wrapper.find('button').text()).toContain('Import Playlist')
 	})
 
@@ -66,7 +70,7 @@ describe('ImportPlaylist', () => {
 			'not-a-playlist-id',
 		]
 
-		invalidInputs.forEach(input => {
+		invalidInputs.forEach((input) => {
 			expect(vm.extractPlaylistId(input)).toBeNull()
 		})
 	})
@@ -223,7 +227,9 @@ describe('ImportPlaylist', () => {
 		} as any)
 
 		// Mock store method to throw error
-		vi.spyOn(songsStore, 'importVideos').mockRejectedValue(new Error('Store error'))
+		vi.spyOn(songsStore, 'importVideos').mockRejectedValue(
+			new Error('Store error'),
+		)
 
 		const wrapper = await mountSuspended(ImportPlaylist)
 
