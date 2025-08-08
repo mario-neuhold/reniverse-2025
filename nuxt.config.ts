@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite'
+import type { PluginOption } from 'vite'
 
 export default defineNuxtConfig({
 	compatibilityDate: '2024-11-01',
@@ -13,7 +14,7 @@ export default defineNuxtConfig({
 	],
 	css: ['~/assets/css/main.css'],
 	vite: {
-		plugins: [tailwindcss()],
+		plugins: tailwindcss() as unknown as PluginOption[],
 	},
 	supabase: {
 		redirectOptions: {
